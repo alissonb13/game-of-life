@@ -3,6 +3,7 @@ using GameOfLife.Business.Domain.Exceptions;
 using GameOfLife.Business.Domain.Extensions;
 using GameOfLife.Business.Domain.Interfaces;
 using GameOfLife.Business.UseCases.GetLastBoardState;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace GameOfLife.Tests.Business.UseCases;
@@ -10,12 +11,13 @@ namespace GameOfLife.Tests.Business.UseCases;
 public class GetLatestBoardStateUseCaseTest
 {
     private readonly Mock<IBoardRepository> _repositoryMock = new();
+    private readonly Mock<ILogger<GetLatestBoardStateUseCase>> _loggerMock = new();
 
     private readonly GetLatestBoardStateUseCase _useCase;
 
     public GetLatestBoardStateUseCaseTest()
     {
-        _useCase = new GetLatestBoardStateUseCase(_repositoryMock.Object);
+        _useCase = new GetLatestBoardStateUseCase(_repositoryMock.Object, _loggerMock.Object);
     }
 
     [Fact]

@@ -3,6 +3,7 @@ using GameOfLife.Business.Domain.Enums;
 using GameOfLife.Business.Domain.Exceptions;
 using GameOfLife.Business.Domain.Interfaces;
 using GameOfLife.Business.UseCases.GetFutureBoardState;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace GameOfLife.Tests.Business.UseCases;
@@ -10,11 +11,12 @@ namespace GameOfLife.Tests.Business.UseCases;
 public class GetFutureBoardStateUseCaseTest
 {
     private readonly Mock<IBoardRepository> _repositoryMock = new();
+    private readonly Mock<ILogger<GetFutureBoardStateUseCase>> _loggerMock = new();
     private readonly GetFutureBoardStateUseCase _useCase;
 
     public GetFutureBoardStateUseCaseTest()
     {
-        _useCase = new GetFutureBoardStateUseCase(_repositoryMock.Object);
+        _useCase = new GetFutureBoardStateUseCase(_repositoryMock.Object, _loggerMock.Object);
     }
 
     [Fact]

@@ -3,6 +3,7 @@ using GameOfLife.Business.Domain.Enums;
 using GameOfLife.Business.Domain.Exceptions;
 using GameOfLife.Business.Domain.Interfaces;
 using GameOfLife.Business.UseCases.GetNextBoardState;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace GameOfLife.Tests.Business.UseCases;
@@ -15,7 +16,9 @@ public class GetNextBoardStateUseCaseTest
     public GetNextBoardStateUseCaseTest()
     {
         _repositoryMock = new Mock<IBoardRepository>();
-        _useCase = new GetNextBoardStateUseCase(_repositoryMock.Object);
+        var loggerMock = new Mock<ILogger<GetNextBoardStateUseCase>>();
+        
+        _useCase = new GetNextBoardStateUseCase(_repositoryMock.Object, loggerMock.Object);
     }
 
     [Fact]
