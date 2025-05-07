@@ -14,8 +14,8 @@ The API allows you to:
 |------------------------------|-------------------------------------------------------------------|
 | `GameOfLife.Api/`            | ASP.NET Core Web API project (e.g., Controllers, Program.cs)      |
 | `GameOfLife.Business/`       | Business logic, use cases, entities and Domain Entities           |
-| `GameOfLife.Infrastructure/` | Infrastructure implementations (e.g., Dependencies, repositories) |
-| `GameOfLife.Tests/`          | Unit and integration test projects                                |
+| `GameOfLife.Infrastructure/` | Infrastructure implementations (e.g., Dependencies, Repositories) |
+| `GameOfLife.Tests/`          | Unit test projects                                                |
 | `docker-compose.yml`         | Docker Compose setup for the API and PostgreSQL                   |
 
 ---
@@ -27,6 +27,28 @@ The API allows you to:
 - [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
+
+---
+
+## 🛠️ Running the API with .NET CLI
+
+To build and run this API locally using the .NET CLI:
+
+### 🔧 Build the project
+
+```bash
+dotnet build
+```
+
+### ▶️ Run the API
+```bash
+dotnet run --project GameOfLife.Api
+```
+
+### 🔄 Restore dependencies (if needed)
+```bash
+dotnet restore
+```
 
 ---
 
@@ -76,15 +98,15 @@ JSON Spec: /swagger/v1/swagger.json
 ## 📡 BoardsController — Endpoints Overview
 This controller handles all operations related to the game board.
 
-> POST /boards
-Creates a new board.
+## 📥 Create a New Board
 
-Request body: JSON with board dimensions and initial cell states.
+**POST** `/boards`
 
-Returns: Board ID and initial state.
+Creates a new board based on the initial state provided.
 
-Example Request:
-```
+**Request Body:**
+
+```json
 {
   "grid": [
     [0, 1, 0, 0, 0],
@@ -95,27 +117,97 @@ Example Request:
   ]
 }
 ```
+**Response (201 Created)**
+```json
+{
+  "id": "cfe3561b-0327-4662-a027-49e8591fd10d"
+}
+```
 
-> GET /boards/{id}
+## 📄 Get the Latest Board State
 
-Retrieves the current state of a specific board.
+**GET** `/boards/{boardId}/states/latest?generationMaxValue=100`
 
-Path Parameter: id — ID of the board.
+Retrieves the most recent state of the board, optionally limited by a maximum generation number.
 
-Returns: Current board matrix.
+Path Parameter:
 
-> GET /boards/{id}/next
+- boardId: The unique ID of the board.
 
-Advances the board by one generation according to Conway’s rules.
+Query Parameter:
 
-- Path Parameter: id — ID of the board.
-- Returns: New state after evolution.
+- generationMaxValue: (Optional) Maximum number of generations to consider.
 
-Rules Implemented:
+**Response (200 OK):**
+```json
+{
+  "generation": 3,
+  "state": [
+    [0, 0, 0, 0, 0],
+    [1, 0, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0]
+  ]
+}
+```
 
-1. Any live cell with 2 or 3 live neighbors survives.
-2. Any dead cell with exactly 3 live neighbors becomes alive.
-3. All other live cells die in the next generation.
+## ⏭️ Get the Next Board State
+
+**GET** `/boards/{boardId}/states/next`
+
+Advances the board to the next generation based on Conway’s Game of Life rules.
+
+Path Parameter:
+
+- boardId: The unique ID of the board.
+
+**Response (200 OK):**
+```json
+{
+  "generation": 3,
+  "state": [
+    [0, 0, 0, 0, 0],
+    [1, 0, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0]
+  ]
+}
+```
+
+## 🔮 Get Future Board State
+
+**GET** `/boards/{boardId}/states/{generations}`
+
+Returns the state of the board after advancing a specific number of generations.
+
+Path Parameters:
+
+- boardId: The unique ID of the board.
+
+- generations: The number of generations to evolve.
+
+**Response (200 OK):**
+```json
+{
+  "generation": 10,
+  "state": [
+    [0, 0, 0, 0, 0],
+    [0, 1, 0, 1, 0], [0, 0, 1, 0, 0],
+    [1, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0]
+  ]
+}
+```
+---
+
+## ♻️ Conway's Game of Life Rules
+1. Any live cell with two or three live neighbors survives.
+
+2. Any dead cell with exactly three live neighbors becomes a live cell.
+
+3. All others live cells die in the next generation. Similarly, all other dead cells stay dead.
 
 ---
 
