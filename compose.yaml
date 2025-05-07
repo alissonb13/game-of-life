@@ -1,0 +1,23 @@
+﻿services:
+  gameoflife:
+    image: game-of-life-api
+    build:
+      context: .
+      dockerfile: GameOfLife.Api/Dockerfile
+
+  postgres:
+    image: postgres:16
+    container_name: game-of-life-db
+    restart: always
+    environment:
+      POSTGRES_USER: conway
+      POSTGRES_PASSWORD: g@m30fl1f3
+      POSTGRES_DB: game_of_life
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+
