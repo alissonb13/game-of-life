@@ -1,6 +1,6 @@
+using GameOfLife.Api.Middlewares;
 using GameOfLife.Infrastructure.Dependencies;
 using Microsoft.OpenApi.Models;
-using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

@@ -1,4 +1,5 @@
 using GameOfLife.Business.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace GameOfLife.Business.Domain.Extensions;
 

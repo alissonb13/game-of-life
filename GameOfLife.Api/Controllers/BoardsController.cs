@@ -15,77 +15,56 @@ public class BoardsController(
     ICreateBoard createBoard,
     IGetNextBoardState getNextBoardState,
     IGetFutureBoardState getFutureBoardState,
-    IGetLatestBoardState getLatestBoardState) : ControllerBase
+    IGetLatestBoardState getLatestBoardState,
+    ILogger<BoardsController> logger) : ControllerBase
 {
+    private readonly string InvalidBoardIdErrorMessage = "Invalid board id";
+    
     [HttpPost]
     public async Task<IActionResult> UploadBoard([FromBody] CreateBoardRequest request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!ModelState.IsValid)
+        {
+            logger.LogError("Invalid board creation request: {@Request}", request);
+            return BadRequest(ModelState);
+        }
 
-        try
-        {
-            var result = await createBoard.Execute(request.ToInput());
-            return StatusCode(StatusCodes.Status201Created, new CreateBoardResponse(result.Board.Id));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
+        var result = await createBoard.Execute(request.ToInput());
+        logger.LogInformation("Board created successfully with ID: {BoardId}", result.Board.Id);
+
+        return StatusCode(StatusCodes.Status201Created, new CreateBoardResponse(result.Board.Id));
     }
 
     [HttpGet("{boardId:guid}/states/latest")]
     public async Task<IActionResult> GetLatestBoardState([FromRoute] Guid boardId, [FromQuery] int generationMaxValue)
     {
-        if (boardId == Guid.Empty)
-        {
-            return BadRequest(new { message = "ID de tabuleiro inválido." });
-        }
-
-        try
-        {
+        if (boardId != Guid.Empty)
             return Ok(await getLatestBoardState.Execute(new GetLatestBoardStateInput(boardId, generationMaxValue)));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
-        }
+
+        logger.LogError("Attempt to retrieve latest board state with empty board ID.");
+        return BadRequest(new { message = InvalidBoardIdErrorMessage });
     }
 
     [HttpGet("{boardId:guid}/states/next")]
     public async Task<IActionResult> GetNextBoardState([FromRoute] Guid boardId)
     {
-        if (boardId == Guid.Empty)
-        {
-            return BadRequest(new { message = "ID de tabuleiro inválido." });
-        }
-
-        try
-        {
+        if (boardId != Guid.Empty)
             return Ok(await getNextBoardState.Execute(new GetNextBoardStateInput(boardId)));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
-        }
+
+        logger.LogError("Attempt to retrieve next board state with empty board ID.");
+        return BadRequest(new { message = InvalidBoardIdErrorMessage });
     }
 
     [HttpGet("{boardId:guid}/states/{generations:int}")]
     public async Task<IActionResult> GetFutureBoardState([FromRoute] Guid boardId, int generations)
     {
-        if (boardId == Guid.Empty)
-        {
-            return BadRequest(new { message = "ID de tabuleiro inválido." });
-        }
-
-        try
-        {
+        if (boardId != Guid.Empty)
             return Ok(await getFutureBoardState.Execute(
                 new GetFutureBoardStateInput(boardId, generations)
             ));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
-        }
+        
+        logger.LogError("Attempt to retrieve future board state with empty board ID.");
+        return BadRequest(new { message = InvalidBoardIdErrorMessage });
+
     }
 }

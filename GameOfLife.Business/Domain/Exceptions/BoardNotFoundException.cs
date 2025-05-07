@@ -1,6 +1,6 @@
 namespace GameOfLife.Business.Domain.Exceptions;
 
-public class BoardNotFoundException : Exception
+public class BoardNotFoundException : BusinessException
 {
     private new const string Message = "Board {0} not found";
 

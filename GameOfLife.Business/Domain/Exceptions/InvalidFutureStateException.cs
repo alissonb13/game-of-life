@@ -1,6 +1,6 @@
 namespace GameOfLife.Business.Domain.Exceptions;
 
-public class InvalidFutureStateException : Exception
+public class InvalidFutureStateException : BusinessException
 {
     private new const string Message = "Future state {0} is invalid";
 

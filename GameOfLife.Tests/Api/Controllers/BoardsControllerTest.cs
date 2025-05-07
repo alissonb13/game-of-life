@@ -10,6 +10,7 @@ using GameOfLife.Business.UseCases.GetLastBoardState;
 using GameOfLife.Business.UseCases.GetNextBoardState;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace GameOfLife.Tests.Api.Controllers;
@@ -22,6 +23,7 @@ public class BoardsControllerTest
     private readonly Mock<IGetNextBoardState> _getNextBoardStateMock = new();
     private readonly Mock<IGetFutureBoardState> _getFutureBoardStateMock = new();
     private readonly Mock<IGetLatestBoardState> _getLatestBoardStateMock = new();
+    private readonly Mock<ILogger<BoardsController>> _loggerMock = new();
 
     private readonly BoardsController _controller;
 
@@ -32,7 +34,8 @@ public class BoardsControllerTest
             _createBoardMock.Object,
             _getNextBoardStateMock.Object,
             _getFutureBoardStateMock.Object,
-            _getLatestBoardStateMock.Object
+            _getLatestBoardStateMock.Object,
+            _loggerMock.Object
         );
     }
 
@@ -76,33 +79,6 @@ public class BoardsControllerTest
 
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
         Assert.IsType<SerializableError>(badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task UploadBoard_ServiceThrowsException_ReturnsInternalServerError()
-    {
-        var request = new CreateBoardRequest
-        {
-            Grid = new int[][] { [0, 1, 0], [1, 1, 1] }
-        };
-        const string expectedErrorMessage = "Some error occurred while uploading the board";
-        var expectedException = new Exception(expectedErrorMessage);
-
-        _createBoardMock
-            .Setup(x => x.Execute(It.IsAny<CreateBoardInput>()))
-            .ThrowsAsync(expectedException);
-
-        var result = await _controller.UploadBoard(request);
-
-        var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(StatusCodes.Status500InternalServerError, objectResult.StatusCode);
-
-        var responseValue = objectResult.Value;
-        var messageProperty = responseValue!.GetType().GetProperty("message");
-        Assert.NotNull(messageProperty);
-
-        var messageValue = messageProperty.GetValue(responseValue) as string;
-        Assert.Equal(expectedErrorMessage, messageValue);
     }
 
     [Fact]
@@ -198,28 +174,5 @@ public class BoardsControllerTest
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(expectedOutput, okResult.Value);
-    }
-
-    [Fact]
-    public async Task GetLatestBoardState_ReturnsInternalServerError_WhenExceptionThrown()
-    {
-        var boardId = Guid.NewGuid();
-        const int generationMaxValue = 10;
-        const string errorMessage = "Erro interno inesperado";
-
-        _getLatestBoardStateMock
-            .Setup(x => x.Execute(It.IsAny<GetLatestBoardStateInput>()))
-            .ThrowsAsync(new Exception(errorMessage));
-
-        var result = await _controller.GetLatestBoardState(boardId, generationMaxValue);
-
-        var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(StatusCodes.Status500InternalServerError, objectResult.StatusCode);
-
-        var messageProperty = objectResult.Value?.GetType().GetProperty("message");
-        Assert.NotNull(messageProperty);
-
-        var messageValue = messageProperty?.GetValue(objectResult.Value) as string;
-        Assert.Equal(errorMessage, messageValue);
     }
 }
