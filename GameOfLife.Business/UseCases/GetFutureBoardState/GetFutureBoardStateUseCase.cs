@@ -4,7 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace GameOfLife.Business.UseCases.GetFutureBoardState;
 
-public class GetFutureBoardStateUseCase(IBoardRepository repository, ILogger<GetFutureBoardStateUseCase> logger) : IGetFutureBoardState
+public class GetFutureBoardStateUseCase(
+    IBoardRepository repository,
+    IBoardStateManagementService service,
+    ILogger<GetFutureBoardStateUseCase> logger) : IGetFutureBoardState
 {
     public async Task<GetFutureBoardStateOutput> Execute(GetFutureBoardStateInput input)
     {
@@ -17,12 +20,12 @@ public class GetFutureBoardStateUseCase(IBoardRepository repository, ILogger<Get
         var board = await repository.GetByIdAsync(input.Id) ?? throw new BoardNotFoundException(input.Id);
 
         logger.LogInformation("Getting future state for board {boardId}", board.Id);
-        
+
         for (var state = 0; state < input.FutureStates; state++)
         {
-            var nextState = board.CurrentState.GetNextState();
+            var nextState = service.GetNextState(board.CurrentState);
             logger.LogInformation("New state for board {boardId}: {newState}", board.Id, nextState);
-            
+
             board.AddState(nextState);
             logger.LogInformation("New state added to board {boardId}", board.Id);
         }

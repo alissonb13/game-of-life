@@ -5,9 +5,9 @@ using GameOfLife.Business.UseCases.CreateBoard;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace GameOfLife.Tests.Business.UseCases;
+namespace GameOfLife.Tests.Unit.Business.UseCases;
 
-public class CreateBoardUseCaseTest
+public class CreateBoardUseCaseUnitTests
 {
     private readonly Mock<IBoardRepository> _repository = new();
     private readonly Mock<ILogger<CreateBoardUseCase>> _logger = new();

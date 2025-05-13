@@ -6,19 +6,25 @@ using GameOfLife.Business.UseCases.GetNextBoardState;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace GameOfLife.Tests.Business.UseCases;
+namespace GameOfLife.Tests.Unit.Business.UseCases;
 
-public class GetNextBoardStateUseCaseTest
+public class GetNextBoardStateUseCaseUnitTests
 {
     private readonly Mock<IBoardRepository> _repositoryMock;
     private readonly GetNextBoardStateUseCase _useCase;
 
-    public GetNextBoardStateUseCaseTest()
+    public GetNextBoardStateUseCaseUnitTests()
     {
         _repositoryMock = new Mock<IBoardRepository>();
+        var serviceMock = new Mock<IBoardStateManagementService>();
+
         var loggerMock = new Mock<ILogger<GetNextBoardStateUseCase>>();
-        
-        _useCase = new GetNextBoardStateUseCase(_repositoryMock.Object, loggerMock.Object);
+
+        _useCase = new GetNextBoardStateUseCase(
+            _repositoryMock.Object,
+            serviceMock.Object,
+            loggerMock.Object
+        );
     }
 
     [Fact]

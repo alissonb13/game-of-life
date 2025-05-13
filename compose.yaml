@@ -4,6 +4,14 @@
     build:
       context: .
       dockerfile: GameOfLife.Api/Dockerfile
+    ports:
+      - "7097:80"
+      - "7098:443"
+    depends_on:
+      - game-of-life-db
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Database=game_of_life;Username=conway;Password=g@m30fl1f3
+      - ASPNETCORE_ENVIRONMENT=Development
 
   postgres:
     image: postgres:16

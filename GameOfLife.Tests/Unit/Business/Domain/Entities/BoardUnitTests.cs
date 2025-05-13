@@ -2,9 +2,9 @@ using AutoFixture;
 using GameOfLife.Business.Domain.Entities;
 using GameOfLife.Tests.Helpers;
 
-namespace GameOfLife.Tests.Business.Domain.Entities;
+namespace GameOfLife.Tests.Unit.Business.Domain.Entities;
 
-public class BoardTest
+public class BoardUnitTests
 {
     private readonly IFixture _fixture = new Fixture();
 

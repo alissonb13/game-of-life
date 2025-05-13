@@ -23,7 +23,12 @@ public class Board(Guid id, int rows, int columns, List<BoardState> history)
 
     public BoardState CurrentState => History.Last();
 
-    public void AddState(BoardState state) => History.Add(state);
+    public void AddState(BoardState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        History.Add(state);
+    }
 
     public bool IsConcluded()
     {
@@ -46,13 +51,15 @@ public class Board(Guid id, int rows, int columns, List<BoardState> history)
     private bool IsOscillating()
     {
         const int generationMinValue = 4;
-        
-        if (History.Count < generationMinValue) return false; 
+
+        if (History.Count < generationMinValue) return false;
 
         for (var i = 0; i < History.Count - 2; i++)
         {
             if (AreGridsEqual(History[i].Grid, CurrentState.Grid))
+            {
                 return true;
+            }
         }
 
         return false;
@@ -69,7 +76,9 @@ public class Board(Guid id, int rows, int columns, List<BoardState> history)
             for (var j = 0; j < gridA[i].Length; j++)
             {
                 if (gridA[i][j] != gridB[i][j])
+                {
                     return false;
+                }
             }
         }
 

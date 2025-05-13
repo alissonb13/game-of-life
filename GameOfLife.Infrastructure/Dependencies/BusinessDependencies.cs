@@ -1,3 +1,5 @@
+using GameOfLife.Business.Domain.Interfaces;
+using GameOfLife.Business.Domain.Services;
 using GameOfLife.Business.UseCases.CreateBoard;
 using GameOfLife.Business.UseCases.GetFutureBoardState;
 using GameOfLife.Business.UseCases.GetLastBoardState;
@@ -11,9 +13,22 @@ public static class BusinessDependencies
     public static IServiceCollection AddBusinessDependencies(this IServiceCollection services)
     {
         return services
+            .AddUseCases()
+            .AddDomainServices();
+    }
+
+    private static IServiceCollection AddUseCases(this IServiceCollection services)
+    {
+        return services
             .AddScoped<ICreateBoard, CreateBoardUseCase>()
             .AddScoped<IGetNextBoardState, GetNextBoardStateUseCase>()
             .AddScoped<IGetFutureBoardState, GetFutureBoardStateUseCase>()
             .AddScoped<IGetLatestBoardState, GetLatestBoardStateUseCase>();
+    }
+
+    private static IServiceCollection AddDomainServices(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<IBoardStateManagementService, BoardStateManagementService>();
     }
 }

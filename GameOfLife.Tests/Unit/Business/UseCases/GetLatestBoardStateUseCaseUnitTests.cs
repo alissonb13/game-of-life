@@ -1,23 +1,30 @@
 using GameOfLife.Business.Domain.Entities;
+using GameOfLife.Business.Domain.Enums;
 using GameOfLife.Business.Domain.Exceptions;
 using GameOfLife.Business.Domain.Extensions;
 using GameOfLife.Business.Domain.Interfaces;
 using GameOfLife.Business.UseCases.GetLastBoardState;
+using GameOfLife.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace GameOfLife.Tests.Business.UseCases;
+namespace GameOfLife.Tests.Unit.Business.UseCases;
 
-public class GetLatestBoardStateUseCaseTest
+public class GetLatestBoardStateUseCaseUnitTests
 {
     private readonly Mock<IBoardRepository> _repositoryMock = new();
+    private readonly Mock<IBoardStateManagementService> _serviceMock = new();
     private readonly Mock<ILogger<GetLatestBoardStateUseCase>> _loggerMock = new();
 
     private readonly GetLatestBoardStateUseCase _useCase;
 
-    public GetLatestBoardStateUseCaseTest()
+    public GetLatestBoardStateUseCaseUnitTests()
     {
-        _useCase = new GetLatestBoardStateUseCase(_repositoryMock.Object, _loggerMock.Object);
+        _useCase = new GetLatestBoardStateUseCase(
+            _repositoryMock.Object,
+            _serviceMock.Object,
+            _loggerMock.Object
+        );
     }
 
     [Fact]
@@ -35,12 +42,23 @@ public class GetLatestBoardStateUseCaseTest
     public async Task Execute_StopsWhenIsConcluded_ReturnsEarly()
     {
         const int generationMaxValue = 5;
-        var state = BoardState.Create(new int[][] { [0, 1, 0], [1, 1, 1], [0, 1, 0] }.ToCellState());
-        var board = Board.Create(state);
+        var grids = Enumerable.Range(0, 5)
+            .Select(_ => GridHelper.CreateGrid(3, 3))
+            .ToList();
+
+        var board = Board.Create(BoardState.Create(grids[0]));
 
         _repositoryMock
             .Setup(r => r.GetByIdAsync(board.Id))
             .ReturnsAsync(board);
+        for (var grid = 1; grid < grids.Count; grid++)
+        {
+            var nextState = BoardState.Create(grids[grid], grid);
+
+            _serviceMock
+                .Setup(s => s.GetNextState(It.IsAny<BoardState>()))
+                .Returns(nextState);
+        }
 
         var input = new GetLatestBoardStateInput(board.Id, generationMaxValue);
 
@@ -56,12 +74,24 @@ public class GetLatestBoardStateUseCaseTest
     public async Task Execute_ReachesGenerationMaxValue_WhenNotConcluded()
     {
         const int generationMaxValue = 5;
-        var state = BoardState.Create(new int[][] { [1, 0, 1], [0, 1, 0], [1, 0, 1] }.ToCellState());
-        var board = Board.Create(state);
+        var grids = Enumerable.Range(0, 5)
+            .Select(_ => GridHelper.CreateGrid(3, 3))
+            .ToList();
+
+        var board = Board.Create(BoardState.Create(grids[0]));
 
         _repositoryMock
             .Setup(r => r.GetByIdAsync(board.Id))
             .ReturnsAsync(board);
+
+        for (var grid = 1; grid < grids.Count; grid++)
+        {
+            var nextState = BoardState.Create(grids[grid], grid);
+
+            _serviceMock
+                .Setup(s => s.GetNextState(It.IsAny<BoardState>()))
+                .Returns(nextState);
+        }
 
         var input = new GetLatestBoardStateInput(board.Id, generationMaxValue);
 
