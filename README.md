@@ -73,10 +73,10 @@ docker-compose up --build
   - Swagger UI is enabled in development mode.
 
 - #### 🐘 PostgreSQL Database (Accessible on port 5432)
-    - Port: 5432
-    - User: conway
-    - Password g@m30fl1f3
-    - Database: game_of_life
+  - Port: 5432
+  - User: conway
+  - Password g@m30fl1f3
+  - Database: game_of_life
 
 > ℹ️ Ensure that port 5432 is free on your machine, and that Docker is installed and running.
 ---
@@ -92,18 +92,22 @@ dotnet test
 Tests are written using xUnit and cover use cases, controller, and other business logic classes.
 
 ---
-## 📖 API Documentation
-Swagger is available during development:
+## 📖 API Documentation using Swagger
+**Swagger** is available during development:
 
 🔗 https://localhost:7097/swagger
 
 JSON Spec: /swagger/v1/swagger.json
+
+![Architecture Diagram](docs/architecture_diagram.png)
 
 ---
 ## 📡 BoardsController — Endpoints Overview
 This controller handles all operations related to the game board.
 
 ## 📥 Create a New Board
+
+![Create Board Diagram](docs/create_board.png)
 
 **POST** `/boards`
 
@@ -129,7 +133,9 @@ Creates a new board based on the initial state provided.
 }
 ```
 
-## 📄 Get the Latest Board State
+## 📄 Get the Last Board State
+
+![Get Last Board State Diagram](docs/get_last_board_state.png)
 
 **GET** `/boards/{boardId}/states/latest?generationMaxValue=100`
 
@@ -159,6 +165,8 @@ Query Parameter:
 
 ## ⏭️ Get the Next Board State
 
+![Get Next Board State Diagram](docs/get_next_board_state.png)
+
 **GET** `/boards/{boardId}/states/next`
 
 Advances the board to the next generation based on Conway’s Game of Life rules.
@@ -182,6 +190,8 @@ Path Parameter:
 ```
 
 ## 🔮 Get Future Board State
+
+![Get Future Board State Diagram](docs/get_future_board_state.png)
 
 **GET** `/boards/{boardId}/states/{generations}`
 
