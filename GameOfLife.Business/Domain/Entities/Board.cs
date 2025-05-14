@@ -12,6 +12,8 @@ public class Board(Guid id, int rows, int columns, List<BoardState> history)
     public static Board Create(BoardState initialState)
     {
         ArgumentNullException.ThrowIfNull(initialState);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(initialState.GetGridRows(), nameof(rows));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(initialState.GetGridColumns(), nameof(columns));
 
         return new Board(
             Guid.NewGuid(),

@@ -16,8 +16,4 @@
         <ProjectReference Include="..\GameOfLife.Business\GameOfLife.Business.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Cache\" />
-    </ItemGroup>
-
 </Project>

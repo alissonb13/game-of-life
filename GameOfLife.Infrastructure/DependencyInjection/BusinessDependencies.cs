@@ -10,14 +10,7 @@ namespace GameOfLife.Infrastructure.DependencyInjection;
 
 public static class BusinessDependencies
 {
-    public static IServiceCollection AddBusinessDependencies(this IServiceCollection services)
-    {
-        return services
-            .AddUseCases()
-            .AddDomainServices();
-    }
-
-    private static IServiceCollection AddUseCases(this IServiceCollection services)
+    public static IServiceCollection AddUseCases(this IServiceCollection services)
     {
         return services
             .AddScoped<ICreateBoard, CreateBoardUseCase>()
@@ -26,7 +19,7 @@ public static class BusinessDependencies
             .AddScoped<IGetLatestBoardState, GetLatestBoardStateUseCase>();
     }
 
-    private static IServiceCollection AddDomainServices(this IServiceCollection services)
+    public static IServiceCollection AddDomainServices(this IServiceCollection services)
     {
         return services
             .AddScoped<IBoardStateManagementService, BoardStateManagementService>();

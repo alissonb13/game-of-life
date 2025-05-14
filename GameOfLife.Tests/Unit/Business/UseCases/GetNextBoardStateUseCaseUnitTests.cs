@@ -10,19 +10,20 @@ namespace GameOfLife.Tests.Unit.Business.UseCases;
 
 public class GetNextBoardStateUseCaseUnitTests
 {
+    private readonly Mock<IBoardStateManagementService> _serviceMock;
     private readonly Mock<IBoardRepository> _repositoryMock;
     private readonly GetNextBoardStateUseCase _useCase;
 
     public GetNextBoardStateUseCaseUnitTests()
     {
         _repositoryMock = new Mock<IBoardRepository>();
-        var serviceMock = new Mock<IBoardStateManagementService>();
+        _serviceMock = new Mock<IBoardStateManagementService>();
 
         var loggerMock = new Mock<ILogger<GetNextBoardStateUseCase>>();
 
         _useCase = new GetNextBoardStateUseCase(
             _repositoryMock.Object,
-            serviceMock.Object,
+            _serviceMock.Object,
             loggerMock.Object
         );
     }
@@ -41,13 +42,18 @@ public class GetNextBoardStateUseCaseUnitTests
         _repositoryMock.Setup(r => r.GetByIdAsync(boardId)).ReturnsAsync(board);
         _repositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Board>())).Returns(Task.CompletedTask);
 
-        var input = new GetNextBoardStateInput(boardId);
+        var nextGrid = new[] { new[] { CellState.Alive, CellState.Alive, CellState.Dead } };
+        var nextState = BoardState.Create(nextGrid);
+        _serviceMock
+            .Setup(s => s.GetNextState(It.IsAny<BoardState>()))
+            .Returns(nextState);
 
+        var input = new GetNextBoardStateInput(boardId);
         var output = await _useCase.Execute(input);
 
         Assert.Equal(boardId, output.Id);
         Assert.Equal(board.CurrentState, output.State);
-        Assert.Equal(2, board.History.Count);
+        Assert.Equal(2, board.History.Count); 
 
         _repositoryMock.Verify(r => r.UpdateAsync(It.Is<Board>(b => b.Id == boardId)), Times.Once);
     }

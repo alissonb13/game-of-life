@@ -8,8 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddBusinessDependencies();
-builder.Services.AddInfrastructureDependencies(builder.Configuration);
+builder.Services.AddDatabaseContext(builder.Configuration);
+builder.Services.AddDomainServices();
+builder.Services.AddRepositories();
+builder.Services.AddUseCases();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

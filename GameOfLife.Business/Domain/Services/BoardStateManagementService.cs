@@ -77,10 +77,10 @@ public class BoardStateManagementService : IBoardStateManagementService
                 var neighborRow = row + deltaRow;
                 var neighborCol = col + deltaCol;
 
-                var isValidPosition = IsValidPosition(neighborRow, neighborCol, rows, cols);
+                if (!IsValidPosition(neighborRow, neighborCol, rows, cols)) continue;
+                
                 var isNeighborAlive = currentState.Grid[neighborRow][neighborCol] == CellState.Alive;
-
-                if (isValidPosition && isNeighborAlive)
+                if (isNeighborAlive)
                 {
                     liveNeighbors++;
                 }
