@@ -92,8 +92,8 @@ dotnet test
 Tests are written using xUnit and cover use cases, controller, and other business logic classes.
 
 ---
-## 📖 API Documentation
-Swagger is available during development:
+## 📖 API Documentation using Swagger
+**Swagger** is available during development:
 
 🔗 https://localhost:7097/swagger
 
