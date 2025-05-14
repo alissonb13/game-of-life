@@ -1,0 +1,40 @@
+@startuml
+actor Client
+participant "BoardsController" as Controller
+participant "CreateBoardUseCase" as UseCase
+participant "BoardService" as Service
+participant "BoardRepository" as Repository
+participant "CacheProvider" as Cache
+
+Client -> Controller : POST /boards\n(CreateBoardRequest)
+activate Controller
+
+Controller -> UseCase : Execute(CreateBoardInput)
+activate UseCase
+
+UseCase -> UseCase : Validate and log input
+UseCase -> UseCase : Create BoardState and Board
+
+UseCase -> Service : CreateAsync(Board)
+activate Service
+
+Service -> Repository : SaveAsync(Board)
+activate Repository
+Repository --> Service : (void)
+deactivate Repository
+
+Service -> Cache : Set(Board.Id, Board)
+activate Cache
+Cache --> Service : (void)
+deactivate Cache
+
+Service --> UseCase : (void)
+deactivate Service
+
+UseCase --> Controller : CreateBoardOutput(Board)
+deactivate UseCase
+
+Controller --> Client : 201 Created + BoardId
+deactivate Controller
+
+@enduml

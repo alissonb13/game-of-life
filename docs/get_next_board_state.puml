@@ -1,0 +1,57 @@
+@startuml
+actor Client
+
+participant BoardsController
+participant GetNextBoardStateUseCase
+participant BoardService
+participant BoardStateManagementService
+participant BoardRepository
+participant CacheProvider
+participant Logger
+
+Client -> BoardsController : HTTP GET /boards/{boardId}/states/next
+BoardsController -> GetNextBoardStateUseCase : execute(GetNextBoardStateInput)
+
+alt Input is null
+    GetNextBoardStateUseCase -> GetNextBoardStateUseCase : Throw ArgumentNullException
+    GetNextBoardStateUseCase --> BoardsController : 400 Bad Request
+    BoardsController -> Client : 400 Bad Request
+else Input valid
+    GetNextBoardStateUseCase -> BoardService : GetByIdAsync(input.Id)
+    alt Board not found
+        BoardService --> GetNextBoardStateUseCase : throws BoardNotFoundException
+        GetNextBoardStateUseCase --> BoardsController : 404 Not Found
+        BoardsController -> Client : 404 Not Found
+    else Board found
+        BoardService --> GetNextBoardStateUseCase : board
+        GetNextBoardStateUseCase -> Logger : LogInformation("Getting next state...")
+
+        GetNextBoardStateUseCase -> BoardService : GetExistingStateFromBoardByGeneration(board, board.CurrentState.Generation + 1)
+        alt Existing state found
+            BoardService --> GetNextBoardStateUseCase : existingState
+            GetNextBoardStateUseCase --> BoardsController : 200 OK (GetNextBoardStateOutput)
+            BoardsController -> Client : 200 OK (existing state)
+        else No existing state
+            BoardService --> GetNextBoardStateUseCase : null
+            GetNextBoardStateUseCase -> BoardStateManagementService : GetNextState(board.CurrentState)
+            BoardStateManagementService --> GetNextBoardStateUseCase : nextState
+            GetNextBoardStateUseCase -> Logger : LogInformation("New state...")
+
+            GetNextBoardStateUseCase -> BoardService : board.AddState(nextState)
+            GetNextBoardStateUseCase -> Logger : LogInformation("New state added...")
+
+            GetNextBoardStateUseCase -> BoardService : UpdateAsync(board)
+            BoardService -> BoardRepository : update(board)
+            BoardRepository --> BoardService : OK
+
+            BoardService -> CacheProvider : set("board:{id}", board)
+            CacheProvider --> BoardService : OK
+
+            BoardService --> GetNextBoardStateUseCase : updated board
+            GetNextBoardStateUseCase -> Logger : LogInformation("Board updated")
+            GetNextBoardStateUseCase --> BoardsController : 200 OK (GetNextBoardStateOutput)
+            BoardsController -> Client : 200 OK (new state)
+        end
+    end
+end
+@enduml

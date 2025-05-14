@@ -5,13 +5,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Business", "GameOfLife.Business\GameOfLife.Business.csproj", "{54FC92D2-2CEA-448D-9E43-4D2CE7225644}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Business", "src\GameOfLife.Business\GameOfLife.Business.csproj", "{54FC92D2-2CEA-448D-9E43-4D2CE7225644}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Infrastructure", "GameOfLife.Infrastructure\GameOfLife.Infrastructure.csproj", "{663A39BC-2638-43EE-8BB5-A35CBE46EE9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Infrastructure", "src\GameOfLife.Infrastructure\GameOfLife.Infrastructure.csproj", "{663A39BC-2638-43EE-8BB5-A35CBE46EE9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Api", "GameOfLife.Api\GameOfLife.Api.csproj", "{C158CB2F-54F3-4FB2-8574-4DE8E131C27C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Api", "src\GameOfLife.Api\GameOfLife.Api.csproj", "{C158CB2F-54F3-4FB2-8574-4DE8E131C27C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Tests", "GameOfLife.Tests\GameOfLife.Tests.csproj", "{6D3829BA-3E46-4C4B-8C0E-BE2B708E7E68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Tests", "src\GameOfLife.Tests\GameOfLife.Tests.csproj", "{6D3829BA-3E46-4C4B-8C0E-BE2B708E7E68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

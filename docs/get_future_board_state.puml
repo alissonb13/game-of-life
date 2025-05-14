@@ -1,0 +1,44 @@
+@startuml
+actor Client
+
+participant BoardsController
+participant GetFutureBoardStateUseCase
+participant GetFutureBoardStateInput
+participant BoardService
+participant BoardStateManagementService
+participant BoardRepository
+participant CacheProvider
+
+Client -> BoardsController : HTTP GET /boards/{boardId}/states/{generations}
+BoardsController -> GetFutureBoardStateUseCase : execute(GetFutureBoardStateInput)
+
+GetFutureBoardStateUseCase -> GetFutureBoardStateInput : validate()
+
+GetFutureBoardStateUseCase -> BoardService : GetByIdAsync(input.Id)
+BoardService --> GetFutureBoardStateUseCase : board
+
+GetFutureBoardStateUseCase -> BoardService : GetExistingStateFromBoardByGeneration(board, generations)
+BoardService --> GetFutureBoardStateUseCase : existingState or null
+
+alt existingState != null
+    GetFutureBoardStateUseCase --> BoardsController : 200 OK (board.Id, board.CurrentState)
+else
+    loop state = 0 to input.FutureStates
+        GetFutureBoardStateUseCase -> BoardStateManagementService : GetNextState(board.CurrentState)
+        BoardStateManagementService --> GetFutureBoardStateUseCase : nextState
+
+        GetFutureBoardStateUseCase -> BoardService : board.AddState(nextState)
+    end
+
+    GetFutureBoardStateUseCase -> BoardService : UpdateAsync(board)
+    BoardService -> BoardRepository : update(board)
+    BoardRepository --> BoardService : OK
+
+    BoardService -> CacheProvider : set("board:{id}", board)
+    CacheProvider --> BoardService : OK
+
+    BoardService --> GetFutureBoardStateUseCase : updated board
+    GetFutureBoardStateUseCase --> BoardsController : 200 OK (board.Id, board.CurrentState)
+end
+BoardsController -> Client : 200 OK (boardOutput)
+@enduml
