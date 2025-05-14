@@ -4,11 +4,25 @@ using Microsoft.Extensions.Logging;
 
 namespace GameOfLife.Business.UseCases.GetLastBoardState;
 
+/// <summary>
+/// Handles the use case for computing and retrieving the latest state of a board
+/// until it reaches a concluded state or the maximum number of generations.
+/// </summary>
+/// <param name="repository">Repository for persisting board data.</param>
+/// <param name="service">Service to manage the board state.</param>
+/// <param name="logger">Logger instance for logging operations.</param>
 public class GetLatestBoardStateUseCase(
     IBoardRepository repository,
     IBoardStateManagementService service,
     ILogger<GetLatestBoardStateUseCase> logger) : IGetLatestBoardState
 {
+    /// <summary>
+    /// Computes the next states of the board until it reaches the maximum allowed generations
+    /// or the simulation reaches a concluded (stable or oscillating) state.
+    /// </summary>
+    /// <param name="input">The input containing the board ID and generation max value.</param>
+    /// <returns>The updated board wrapped in a GetLatestBoardStateOutput object.</returns>
+    /// <exception cref="BoardNotFoundException">Thrown if the board with the given ID is not found.</exception>
     public async Task<GetLatestBoardStateOutput> Execute(GetLatestBoardStateInput input)
     {
         var board = await repository.GetByIdAsync(input.BoardId)

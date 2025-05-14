@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 
-namespace GameOfLife.Infrastructure.Dependencies;
+namespace GameOfLife.Infrastructure.DependencyInjection;
 
 public static class InfrastructureDependencies
 {

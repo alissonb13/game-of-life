@@ -4,11 +4,24 @@ using Microsoft.Extensions.Logging;
 
 namespace GameOfLife.Business.UseCases.GetNextBoardState;
 
+/// <summary>
+/// Handles the use case for retrieving the next state of a specific board in the Game of Life.
+/// </summary>
+/// <param name="repository">Repository for persisting board data.</param>
+/// <param name="service">Service to manage the board state.</param>
+/// <param name="logger">Logger instance for logging operations.</param>
 public class GetNextBoardStateUseCase(
     IBoardRepository repository,
     IBoardStateManagementService service,
     ILogger<GetNextBoardStateUseCase> logger) : IGetNextBoardState
 {
+    /// <summary>
+    /// Computes and returns the next state of a board based on its current configuration.
+    /// </summary>
+    /// <param name="input">The input containing the board ID.</param>
+    /// <returns> A GetNextBoardStateOutput containing the board ID and the newly computed state.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the input is null.</exception>
+    /// <exception cref="BoardNotFoundException">Thrown when the board with the specified ID does not exist.</exception>
     public async Task<GetNextBoardStateOutput> Execute(GetNextBoardStateInput input)
     {
         ArgumentNullException.ThrowIfNull(input);

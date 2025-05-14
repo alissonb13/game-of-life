@@ -1,7 +1,6 @@
 using System.Reflection;
-using GameOfLife.Api.Controllers;
 using GameOfLife.Api.Middlewares;
-using GameOfLife.Infrastructure.Dependencies;
+using GameOfLife.Infrastructure.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);

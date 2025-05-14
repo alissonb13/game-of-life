@@ -6,7 +6,7 @@ using GameOfLife.Business.UseCases.GetLastBoardState;
 using GameOfLife.Business.UseCases.GetNextBoardState;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GameOfLife.Infrastructure.Dependencies;
+namespace GameOfLife.Infrastructure.DependencyInjection;
 
 public static class BusinessDependencies
 {
