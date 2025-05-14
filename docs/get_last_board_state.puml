@@ -1,0 +1,52 @@
+@startuml
+actor Client
+
+participant BoardsController
+participant GetLastBoardStateUseCase
+participant BoardService
+participant BoardStateManagementService
+participant BoardRepository
+participant CacheProvider
+participant Logger
+
+Client -> BoardsController : HTTP GET /boards/{boardId}/states/latest
+BoardsController -> GetLastBoardStateUseCase : execute(GetLastBoardStateInput)
+
+GetLastBoardStateUseCase -> BoardService : GetByIdAsync(input.BoardId)
+alt Board not found
+    BoardService --> GetLastBoardStateUseCase : throws BoardNotFoundException
+    GetLastBoardStateUseCase --> BoardsController : 404 Not Found
+    BoardsController -> Client : 404 Not Found
+else Board found
+    BoardService --> GetLastBoardStateUseCase : board
+    GetLastBoardStateUseCase -> Logger : LogInformation("Getting latest state...")
+
+    loop state = 0 to input.GenerationMaxValue
+        GetLastBoardStateUseCase -> BoardStateManagementService : GetNextState(board.CurrentState)
+        BoardStateManagementService --> GetLastBoardStateUseCase : nextState
+        GetLastBoardStateUseCase -> Logger : LogInformation("New state...")
+
+        GetLastBoardStateUseCase -> BoardService : board.AddState(nextState)
+        GetLastBoardStateUseCase -> Logger : LogInformation("New state added...")
+
+        GetLastBoardStateUseCase -> BoardService : board.IsConcluded()
+        alt board.IsConcluded() == true
+            GetLastBoardStateUseCase -> Logger : LogInformation("Board concluded")
+            break
+        end
+    end
+
+    GetLastBoardStateUseCase -> BoardService : UpdateAsync(board)
+    BoardService -> BoardRepository : update(board)
+    BoardRepository --> BoardService : OK
+
+    BoardService -> CacheProvider : set("board:{id}", board)
+    CacheProvider --> BoardService : OK
+
+    BoardService --> GetLastBoardStateUseCase : updated board
+    GetLastBoardStateUseCase -> Logger : LogInformation("Board updated")
+    GetLastBoardStateUseCase --> BoardsController : 200 OK (GetLastBoardStateOutput)
+
+    BoardsController -> Client : 200 OK (GetLastBoardStateOutput)
+end
+@enduml

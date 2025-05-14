@@ -15,7 +15,7 @@ The API allows you to:
 | `GameOfLife.Api/`            | ASP.NET Core Web API project (e.g., Controllers, Program.cs)      |
 | `GameOfLife.Business/`       | Business logic, use cases, entities and Domain Entities           |
 | `GameOfLife.Infrastructure/` | Infrastructure implementations (e.g., Dependencies, Repositories) |
-| `GameOfLife.Tests/`          | Unit test projects                                                |
+| `GameOfLife.Tests/`          | Unit and integration tests                                        |
 | `docker-compose.yml`         | Docker Compose setup for the API and PostgreSQL                   |
 
 ---

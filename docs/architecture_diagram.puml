@@ -1,0 +1,46 @@
+@startuml
+scale 2
+title Game of Life Architecture
+
+actor Player
+rectangle "Web API" {
+  rectangle "BoardsController" as controller
+  
+  rectangle "Use Cases" {
+    component "CreateBoard" as create
+    component "GetNextState" as next
+    component "GetLastState" as last
+    component "GetFutureState" as future
+  }
+  
+  rectangle "Services" {
+    component "BoardService" as bs
+    component "StateService" as ss
+  }
+  
+  rectangle "Infra" {
+    component "Repository" as repo
+    component "Cache" as cache
+  }
+}
+
+database PostgreSQL
+storage "Memory Cache" as mem
+
+Player --> controller
+controller --> create
+controller --> next
+controller --> last
+controller --> future
+
+create --> bs
+next --> ss
+last --> ss
+future --> ss
+
+bs --> repo
+bs --> cache
+ss --> repo
+repo --> PostgreSQL
+cache --> mem
+@enduml
