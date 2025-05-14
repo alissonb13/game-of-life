@@ -1,9 +1,9 @@
 using GameOfLife.Business.Domain.Enums;
 using GameOfLife.Business.Domain.Extensions;
 
-namespace GameOfLife.Tests.Business.Extensions;
+namespace GameOfLife.Tests.Unit.Business.Extensions;
 
-public class GridExtensionsTest
+public class GridExtensionsUnitTests
 {
     [Fact]
     public void ToCellState_ShouldConvertValidIntGridToCellStateGrid()

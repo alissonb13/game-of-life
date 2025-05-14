@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace GameOfLife.Tests.Api.Controllers;
+namespace GameOfLife.Tests.Unit.Api.Controllers;
 
 public class BoardsControllerTest
 {

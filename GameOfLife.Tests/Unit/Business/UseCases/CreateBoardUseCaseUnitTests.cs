@@ -5,12 +5,12 @@ using GameOfLife.Business.UseCases.CreateBoard;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace GameOfLife.Tests.Business.UseCases;
+namespace GameOfLife.Tests.Unit.Business.UseCases;
 
-public class CreateBoardUseCaseTest
+public class CreateBoardUseCaseUnitTests
 {
-    private readonly Mock<IBoardRepository> _repository = new();
-    private readonly Mock<ILogger<CreateBoardUseCase>> _logger = new();
+    private readonly Mock<IBoardService> _boardServiceMock = new();
+    private readonly Mock<ILogger<CreateBoardUseCase>> _loggerMock = new();
 
     [Fact]
     public async Task Execute_WithValidInput_ShouldCreateBoardAndReturnOutput()
@@ -21,7 +21,7 @@ public class CreateBoardUseCaseTest
             [0, 1]
         });
 
-        var usecase = new CreateBoardUseCase(_repository.Object, _logger.Object);
+        var usecase = new CreateBoardUseCase(_boardServiceMock.Object, _loggerMock.Object);
 
         var result = await usecase.Execute(input);
 
@@ -37,13 +37,13 @@ public class CreateBoardUseCaseTest
         Assert.Equal(CellState.Dead, initialState.Grid[1][0]);
         Assert.Equal(CellState.Alive, initialState.Grid[1][1]);
 
-        _repository.Verify(r => r.SaveAsync(It.IsAny<Board>()), Times.Once);
+        _boardServiceMock.Verify(r => r.CreateAsync(It.IsAny<Board>()), Times.Once);
     }
 
     [Fact]
     public async Task Execute_WithNullInput_ShouldThrowArgumentNullException()
     {
-        var usecase = new CreateBoardUseCase(_repository.Object, _logger.Object);
+        var usecase = new CreateBoardUseCase(_boardServiceMock.Object, _loggerMock.Object);
         await Assert.ThrowsAsync<ArgumentNullException>(() => usecase.Execute(null!));
     }
 }

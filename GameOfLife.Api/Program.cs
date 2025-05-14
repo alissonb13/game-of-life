@@ -1,5 +1,6 @@
+using System.Reflection;
 using GameOfLife.Api.Middlewares;
-using GameOfLife.Infrastructure.Dependencies;
+using GameOfLife.Infrastructure.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,18 +8,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddBusinessDependencies();
-builder.Services.AddInfrastructureDependencies(builder.Configuration);
+builder.Services.AddDatabaseContext(builder.Configuration);
+builder.Services.AddDomainServices();
+builder.Services.AddRepositories();
+builder.Services.AddUseCases();
+builder.Services.AddCache();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.SwaggerDoc("v1",
+    options.SwaggerDoc("v1",
         new OpenApiInfo
         {
-            Title = "Game of Life API", 
+            Title = "Game of Life API",
             Description = "This API simulates the features of Conway's Game Of Life"
         });
+
+    var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var path = Path.Combine(AppContext.BaseDirectory, xml);
+
+    options.IncludeXmlComments(path, includeControllerXmlComments: true);
 });
 
 var app = builder.Build();

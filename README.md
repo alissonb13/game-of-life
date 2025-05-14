@@ -45,7 +45,12 @@ dotnet build
 dotnet run --project GameOfLife.Api
 ```
 
-### 🔄 Restore dependencies (if needed)
+### 🔄 Run migrations
+```bash
+dotnet ef database update --project GameOfLife.Api
+```
+
+### 📦 Restore dependencies (if needed)
 ```bash
 dotnet restore
 ```
@@ -56,7 +61,7 @@ dotnet restore
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/game-of-life-api.git
+git clone https://github.com/alissonb13/game-of-life-api.git
 cd game-of-life-api
 
 # 2. Build and start the API and PostgreSQL containers

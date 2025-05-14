@@ -5,6 +5,13 @@ namespace GameOfLife.Business.Domain.Extensions;
 
 public static class GridExtensions
 {
+    /// <summary>
+    /// Converts a 2D integer array into a 2D CellState array
+    /// </summary>
+    /// <param name="grid">2D integer array representing the cell states</param>
+    /// <returns>2D array of CellState</returns>
+    /// <exception cref="ArgumentNullException">Thrown if the grid is null</exception>
+    /// <exception cref="ArgumentException">Thrown if the grid is irregular or contains invalid values</exception>
     public static CellState[][] ToCellState(this int[][] grid)
     {
         ArgumentNullException.ThrowIfNull(grid);

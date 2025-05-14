@@ -21,5 +21,9 @@ RUN dotnet publish "./GameOfLife.Api.csproj" -c $BUILD_CONFIGURATION -o /app/pub
 
 FROM base AS final
 WORKDIR /app
+
+COPY run_migration.sh .
+RUN chmod +x run_migration.sh
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "GameOfLife.Api.dll"]
