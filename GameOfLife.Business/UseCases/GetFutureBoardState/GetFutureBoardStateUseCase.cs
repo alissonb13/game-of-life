@@ -7,15 +7,14 @@ namespace GameOfLife.Business.UseCases.GetFutureBoardState;
 /// <summary>
 /// Handles the use case for retrieving future states of a board in the Game of Life.
 /// </summary>
-/// <param name="repository">Repository for persisting board data.</param>
-/// <param name="service">Service to manage the board state.</param>
+/// <param name="boardService">Service to handle board data.</param>
+/// <param name="boardStateManagementService">Service to manage the board state.</param>
 /// <param name="logger">Logger instance for logging operations.</param>
 public class GetFutureBoardStateUseCase(
-    IBoardRepository repository,
-    IBoardStateManagementService service,
+    IBoardService boardService,
+    IBoardStateManagementService boardStateManagementService,
     ILogger<GetFutureBoardStateUseCase> logger) : IGetFutureBoardState
 {
-    
     /// <summary>
     /// Calculates and retrieves the future state(s) of a board.
     /// </summary>
@@ -25,26 +24,35 @@ public class GetFutureBoardStateUseCase(
     /// <exception cref="BoardNotFoundException">Thrown when the board with the given ID is not found.</exception>
     public async Task<GetFutureBoardStateOutput> Execute(GetFutureBoardStateInput input)
     {
-        if (input.FutureStates < 1)
-        {
-            logger.LogError("FutureStates must be greater than 0");
-            throw new InvalidFutureStateException(input.FutureStates);
-        }
+        input.Validate();
 
-        var board = await repository.GetByIdAsync(input.Id) ?? throw new BoardNotFoundException(input.Id);
+        var board = await boardService.GetByIdAsync(input.Id);
 
         logger.LogInformation("Getting future state for board {boardId}", board.Id);
 
+        var existingState = boardService.GetExistingStateFromBoardByGeneration(board, input.FutureStates);
+
+        if (existingState is not null)
+        {
+            logger.LogInformation(
+                "Board {boardId} already has the requested state (Generation {generation})",
+                board.Id,
+                input.FutureStates
+            );
+
+            return new GetFutureBoardStateOutput(board.Id, board.CurrentState);
+        }
+
         for (var state = 0; state < input.FutureStates; state++)
         {
-            var nextState = service.GetNextState(board.CurrentState);
+            var nextState = boardStateManagementService.GetNextState(board.CurrentState);
             logger.LogInformation("New state for board {boardId}: {newState}", board.Id, nextState);
 
             board.AddState(nextState);
             logger.LogInformation("New state added to board {boardId}", board.Id);
         }
 
-        await repository.UpdateAsync(board);
+        await boardService.UpdateAsync(board);
         logger.LogInformation("Board {boardId} updated", board.Id);
 
         return new GetFutureBoardStateOutput(board.Id, board.CurrentState);

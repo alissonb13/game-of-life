@@ -10,20 +10,21 @@ namespace GameOfLife.Tests.Unit.Business.UseCases;
 
 public class GetNextBoardStateUseCaseUnitTests
 {
-    private readonly Mock<IBoardStateManagementService> _serviceMock;
-    private readonly Mock<IBoardRepository> _repositoryMock;
+    private readonly Mock<IBoardService> _boardServiceMock;
+    private readonly Mock<IBoardStateManagementService> _boardStateManagementServiceMock;
+
     private readonly GetNextBoardStateUseCase _useCase;
 
     public GetNextBoardStateUseCaseUnitTests()
     {
-        _repositoryMock = new Mock<IBoardRepository>();
-        _serviceMock = new Mock<IBoardStateManagementService>();
+        _boardServiceMock = new Mock<IBoardService>();
+        _boardStateManagementServiceMock = new Mock<IBoardStateManagementService>();
 
         var loggerMock = new Mock<ILogger<GetNextBoardStateUseCase>>();
 
         _useCase = new GetNextBoardStateUseCase(
-            _repositoryMock.Object,
-            _serviceMock.Object,
+            _boardServiceMock.Object,
+            _boardStateManagementServiceMock.Object,
             loggerMock.Object
         );
     }
@@ -39,12 +40,12 @@ public class GetNextBoardStateUseCaseUnitTests
         typeof(Board).GetProperty(nameof(Board.Id))!
             .SetValue(board, boardId);
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(boardId)).ReturnsAsync(board);
-        _repositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Board>())).Returns(Task.CompletedTask);
+        _boardServiceMock.Setup(r => r.GetByIdAsync(boardId)).ReturnsAsync(board);
+        _boardServiceMock.Setup(r => r.UpdateAsync(It.IsAny<Board>())).Returns(Task.CompletedTask);
 
         var nextGrid = new[] { new[] { CellState.Alive, CellState.Alive, CellState.Dead } };
         var nextState = BoardState.Create(nextGrid);
-        _serviceMock
+        _boardStateManagementServiceMock
             .Setup(s => s.GetNextState(It.IsAny<BoardState>()))
             .Returns(nextState);
 
@@ -53,16 +54,19 @@ public class GetNextBoardStateUseCaseUnitTests
 
         Assert.Equal(boardId, output.Id);
         Assert.Equal(board.CurrentState, output.State);
-        Assert.Equal(2, board.History.Count); 
+        Assert.Equal(2, board.History.Count);
 
-        _repositoryMock.Verify(r => r.UpdateAsync(It.Is<Board>(b => b.Id == boardId)), Times.Once);
+        _boardServiceMock.Verify(r => r.UpdateAsync(It.Is<Board>(b => b.Id == boardId)), Times.Once);
     }
 
     [Fact]
     public async Task Execute_ShouldThrowBoardNotFoundException_WhenBoardDoesNotExist()
     {
         var boardId = Guid.NewGuid();
-        _repositoryMock.Setup(r => r.GetByIdAsync(boardId)).ReturnsAsync((Board?)null);
+        
+        _boardServiceMock
+            .Setup(r => r.GetByIdAsync(boardId))
+            .ThrowsAsync(new BoardNotFoundException(boardId));
 
         var input = new GetNextBoardStateInput(boardId);
 

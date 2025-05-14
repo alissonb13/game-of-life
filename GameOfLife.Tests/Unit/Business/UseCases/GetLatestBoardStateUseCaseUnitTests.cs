@@ -12,8 +12,8 @@ namespace GameOfLife.Tests.Unit.Business.UseCases;
 
 public class GetLatestBoardStateUseCaseUnitTests
 {
-    private readonly Mock<IBoardRepository> _repositoryMock = new();
-    private readonly Mock<IBoardStateManagementService> _serviceMock = new();
+    private readonly Mock<IBoardService> _boardServiceMock = new();
+    private readonly Mock<IBoardStateManagementService> _boardStateManagementServiceMock = new();
     private readonly Mock<ILogger<GetLatestBoardStateUseCase>> _loggerMock = new();
 
     private readonly GetLatestBoardStateUseCase _useCase;
@@ -21,8 +21,8 @@ public class GetLatestBoardStateUseCaseUnitTests
     public GetLatestBoardStateUseCaseUnitTests()
     {
         _useCase = new GetLatestBoardStateUseCase(
-            _repositoryMock.Object,
-            _serviceMock.Object,
+            _boardServiceMock.Object,
+            _boardStateManagementServiceMock.Object,
             _loggerMock.Object
         );
     }
@@ -33,7 +33,9 @@ public class GetLatestBoardStateUseCaseUnitTests
         var boardId = Guid.NewGuid();
         var input = new GetLatestBoardStateInput(boardId, 10);
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(boardId)).ReturnsAsync((Board?)null);
+        _boardServiceMock
+            .Setup(r => r.GetByIdAsync(boardId))
+            .ThrowsAsync(new BoardNotFoundException(boardId));
 
         await Assert.ThrowsAsync<BoardNotFoundException>(() => _useCase.Execute(input));
     }
@@ -48,14 +50,14 @@ public class GetLatestBoardStateUseCaseUnitTests
 
         var board = Board.Create(BoardState.Create(grids[0]));
 
-        _repositoryMock
+        _boardServiceMock
             .Setup(r => r.GetByIdAsync(board.Id))
             .ReturnsAsync(board);
         for (var grid = 1; grid < grids.Count; grid++)
         {
             var nextState = BoardState.Create(grids[grid], grid);
 
-            _serviceMock
+            _boardStateManagementServiceMock
                 .Setup(s => s.GetNextState(It.IsAny<BoardState>()))
                 .Returns(nextState);
         }
@@ -64,7 +66,7 @@ public class GetLatestBoardStateUseCaseUnitTests
 
         var output = await _useCase.Execute(input);
 
-        _repositoryMock.Verify(r => r.UpdateAsync(board), Times.Once);
+        _boardServiceMock.Verify(r => r.UpdateAsync(board), Times.Once);
 
         Assert.NotNull(output);
         Assert.Equal(board, output.Board);
@@ -80,7 +82,7 @@ public class GetLatestBoardStateUseCaseUnitTests
 
         var board = Board.Create(BoardState.Create(grids[0]));
 
-        _repositoryMock
+        _boardServiceMock
             .Setup(r => r.GetByIdAsync(board.Id))
             .ReturnsAsync(board);
 
@@ -88,7 +90,7 @@ public class GetLatestBoardStateUseCaseUnitTests
         {
             var nextState = BoardState.Create(grids[grid], grid);
 
-            _serviceMock
+            _boardStateManagementServiceMock
                 .Setup(s => s.GetNextState(It.IsAny<BoardState>()))
                 .Returns(nextState);
         }
@@ -97,7 +99,7 @@ public class GetLatestBoardStateUseCaseUnitTests
 
         var output = await _useCase.Execute(input);
 
-        _repositoryMock.Verify(r => r.UpdateAsync(board), Times.Once);
+        _boardServiceMock.Verify(r => r.UpdateAsync(board), Times.Once);
 
         Assert.NotNull(output);
     }

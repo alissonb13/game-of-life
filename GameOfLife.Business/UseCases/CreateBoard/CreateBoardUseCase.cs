@@ -8,9 +8,11 @@ namespace GameOfLife.Business.UseCases.CreateBoard;
 /// <summary>
 /// Use case for creating a new game board.
 /// </summary>
-/// <param name="repository">Repository for persisting board data.</param>
+/// <param name="boardService">Service to handle board data.</param>
 /// <param name="logger">Logger instance for logging operations.</param>
-public class CreateBoardUseCase(IBoardRepository repository, ILogger<CreateBoardUseCase> logger) : ICreateBoard
+public class CreateBoardUseCase(
+    IBoardService boardService,
+    ILogger<CreateBoardUseCase> logger) : ICreateBoard
 {
     /// <summary>
     /// Executes the creation of a new board from the provided input grid.
@@ -21,16 +23,16 @@ public class CreateBoardUseCase(IBoardRepository repository, ILogger<CreateBoard
     public async Task<CreateBoardOutput> Execute(CreateBoardInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
-        
+
         logger.LogInformation("Starting create board");
 
         var initialState = BoardState.Create(input.Grid.ToCellState());
         var board = Board.Create(initialState);
-        
-        await repository.SaveAsync(board);
+
+        await boardService.CreateAsync(board);
 
         logger.LogInformation("New board created");
-        
+
         return new CreateBoardOutput(board);
     }
 }

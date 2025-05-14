@@ -8,12 +8,12 @@ namespace GameOfLife.Business.UseCases.GetLastBoardState;
 /// Handles the use case for computing and retrieving the latest state of a board
 /// until it reaches a concluded state or the maximum number of generations.
 /// </summary>
-/// <param name="repository">Repository for persisting board data.</param>
-/// <param name="service">Service to manage the board state.</param>
+/// <param name="boardService">Service for handle board data.</param>
+/// <param name="boardStateManagementService">Service to manage the board state.</param>
 /// <param name="logger">Logger instance for logging operations.</param>
 public class GetLatestBoardStateUseCase(
-    IBoardRepository repository,
-    IBoardStateManagementService service,
+    IBoardService boardService,
+    IBoardStateManagementService boardStateManagementService,
     ILogger<GetLatestBoardStateUseCase> logger) : IGetLatestBoardState
 {
     /// <summary>
@@ -25,14 +25,13 @@ public class GetLatestBoardStateUseCase(
     /// <exception cref="BoardNotFoundException">Thrown if the board with the given ID is not found.</exception>
     public async Task<GetLatestBoardStateOutput> Execute(GetLatestBoardStateInput input)
     {
-        var board = await repository.GetByIdAsync(input.BoardId)
-                    ?? throw new BoardNotFoundException(input.BoardId);
+        var board = await boardService.GetByIdAsync(input.BoardId);
 
         logger.LogInformation("Getting latest state for board {boardId}", board.Id);
-
+        
         for (var state = 0; state < input.GenerationMaxValue; state++)
         {
-            var nextState = service.GetNextState(board.CurrentState);
+            var nextState = boardStateManagementService.GetNextState(board.CurrentState);
             logger.LogInformation("New state for board {boardId}: {newState}", board.Id, nextState);
 
             board.AddState(nextState);
@@ -44,7 +43,7 @@ public class GetLatestBoardStateUseCase(
             break;
         }
 
-        await repository.UpdateAsync(board);
+        await boardService.UpdateAsync(board);
         logger.LogInformation("Board {boardId} updated", board.Id);
 
         return new GetLatestBoardStateOutput(board);

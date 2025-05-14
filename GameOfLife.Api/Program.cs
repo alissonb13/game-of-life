@@ -12,6 +12,7 @@ builder.Services.AddDatabaseContext(builder.Configuration);
 builder.Services.AddDomainServices();
 builder.Services.AddRepositories();
 builder.Services.AddUseCases();
+builder.Services.AddCache();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

@@ -22,6 +22,7 @@ public static class BusinessDependencies
     public static IServiceCollection AddDomainServices(this IServiceCollection services)
     {
         return services
+            .AddScoped<IBoardService, BoardService>()
             .AddScoped<IBoardStateManagementService, BoardStateManagementService>();
     }
 }

@@ -10,8 +10,8 @@ namespace GameOfLife.Tests.Unit.Business.UseCases;
 
 public class GetFutureBoardStateUseCaseUnitTests
 {
-    private readonly Mock<IBoardRepository> _repositoryMock = new();
-    private readonly Mock<IBoardStateManagementService> _serviceMock = new();
+    private readonly Mock<IBoardService> _boardServiceMock = new();
+    private readonly Mock<IBoardStateManagementService> _boardStateManagementServiceMock = new();
     private readonly Mock<ILogger<GetFutureBoardStateUseCase>> _loggerMock = new();
 
     private readonly GetFutureBoardStateUseCase _useCase;
@@ -19,8 +19,8 @@ public class GetFutureBoardStateUseCaseUnitTests
     public GetFutureBoardStateUseCaseUnitTests()
     {
         _useCase = new GetFutureBoardStateUseCase(
-            _repositoryMock.Object,
-            _serviceMock.Object,
+            _boardServiceMock.Object,
+            _boardStateManagementServiceMock.Object,
             _loggerMock.Object
         );
     }
@@ -39,7 +39,9 @@ public class GetFutureBoardStateUseCaseUnitTests
         var boardId = Guid.NewGuid();
         var input = new GetFutureBoardStateInput(boardId, 2);
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(boardId)).ReturnsAsync((Board?)null);
+        _boardServiceMock
+            .Setup(r => r.GetByIdAsync(boardId))
+            .ThrowsAsync(new BoardNotFoundException(boardId));
 
         await Assert.ThrowsAsync<BoardNotFoundException>(() => _useCase.Execute(input));
     }
@@ -58,14 +60,14 @@ public class GetFutureBoardStateUseCaseUnitTests
 
         var input = new GetFutureBoardStateInput(boardId, 2);
 
-        _repositoryMock
+        _boardServiceMock
             .Setup(r => r.GetByIdAsync(boardId))
             .ReturnsAsync(board);
-        _serviceMock
+        _boardStateManagementServiceMock
             .SetupSequence(s => s.GetNextState(It.IsAny<BoardState>()))
             .Returns(nextState1)
             .Returns(nextState2);
-        _repositoryMock
+        _boardServiceMock
             .Setup(r => r.UpdateAsync(It.IsAny<Board>()))
             .Returns(Task.CompletedTask);
 
@@ -74,6 +76,6 @@ public class GetFutureBoardStateUseCaseUnitTests
         Assert.Equal(board.Id, output.BoardId);
         Assert.Equal(initialState.Generation + 2, output.State.Generation);
         Assert.Equal(3, board.History.Count);
-        _repositoryMock.Verify(r => r.UpdateAsync(It.Is<Board>(b => b.Id == boardId)), Times.Once);
+        _boardServiceMock.Verify(r => r.UpdateAsync(It.Is<Board>(b => b.Id == boardId)), Times.Once);
     }
 }

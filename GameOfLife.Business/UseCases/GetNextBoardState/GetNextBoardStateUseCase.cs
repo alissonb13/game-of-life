@@ -7,12 +7,12 @@ namespace GameOfLife.Business.UseCases.GetNextBoardState;
 /// <summary>
 /// Handles the use case for retrieving the next state of a specific board in the Game of Life.
 /// </summary>
-/// <param name="repository">Repository for persisting board data.</param>
-/// <param name="service">Service to manage the board state.</param>
+/// <param name="boardService">Service to handle board data.</param>
+/// <param name="boardStateManagementService">Service to manage the board state.</param>
 /// <param name="logger">Logger instance for logging operations.</param>
 public class GetNextBoardStateUseCase(
-    IBoardRepository repository,
-    IBoardStateManagementService service,
+    IBoardService boardService,
+    IBoardStateManagementService boardStateManagementService,
     ILogger<GetNextBoardStateUseCase> logger) : IGetNextBoardState
 {
     /// <summary>
@@ -26,17 +26,22 @@ public class GetNextBoardStateUseCase(
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        var board = await repository.GetByIdAsync(input.Id) ?? throw new BoardNotFoundException(input.Id);
+        var board = await boardService.GetByIdAsync(input.Id);
 
         logger.LogInformation("Getting next state for board {boardId}", board.Id);
 
-        var nextState = service.GetNextState(board.CurrentState);
+        var existingState = boardService
+            .GetExistingStateFromBoardByGeneration(board, board.CurrentState.Generation + 1);
+
+        if (existingState != null) return new GetNextBoardStateOutput(board.Id, existingState.CurrentState);
+
+        var nextState = boardStateManagementService.GetNextState(board.CurrentState);
         logger.LogInformation("New state for board {boardId}: {newState}", board.Id, nextState);
 
         board.AddState(nextState);
         logger.LogInformation("New state added to board {boardId}", board.Id);
 
-        await repository.UpdateAsync(board);
+        await boardService.UpdateAsync(board);
         logger.LogInformation("Board {boardId} updated", board.Id);
 
         return new GetNextBoardStateOutput(board.Id, nextState);

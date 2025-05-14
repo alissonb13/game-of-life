@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
-using IBoardStateCacheRepository = GameOfLife.Business.Domain.Interfaces.IBoardStateCacheRepository;
 
 namespace GameOfLife.Infrastructure.DependencyInjection;
 
@@ -14,9 +13,14 @@ public static class InfrastructureDependencies
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         return services
-            .AddScoped<IBoardRepository, BoardRepository>()
-            .AddScoped<ICacheProvider, MemoryCacheProvider>()
-            .AddScoped<IBoardStateCacheRepository, BoardStateCacheRepository>();
+            .AddScoped<IBoardRepository, BoardRepository>();
+    }
+
+    public static IServiceCollection AddCache(this IServiceCollection services)
+    {
+        return services
+            .AddMemoryCache()
+            .AddScoped<ICacheProvider, MemoryCacheProvider>();
     }
 
     public static IServiceCollection AddDatabaseContext(

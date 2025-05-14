@@ -27,7 +27,6 @@ public class BoardRepositoryIntegrationTests
     [Fact]
     public async Task GetByIdAsync_ReturnsBoard_WhenBoardExists()
     {
-        // Arrange
         var context = CreateInMemoryContext(nameof(GetByIdAsync_ReturnsBoard_WhenBoardExists));
         var repository = CreateRepository(context);
 
@@ -37,10 +36,8 @@ public class BoardRepositoryIntegrationTests
         context.Boards.Add(board);
         await context.SaveChangesAsync();
 
-        // Act
         var result = await repository.GetByIdAsync(board.Id);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(board.Id, result.Id);
     }
@@ -48,33 +45,27 @@ public class BoardRepositoryIntegrationTests
     [Fact]
     public async Task GetByIdAsync_ReturnsNull_WhenBoardDoesNotExist()
     {
-        // Arrange
         var context = CreateInMemoryContext(nameof(GetByIdAsync_ReturnsNull_WhenBoardDoesNotExist));
         var repository = CreateRepository(context);
 
         var nonExistentId = Guid.NewGuid();
 
-        // Act
         var result = await repository.GetByIdAsync(nonExistentId);
 
-        // Assert
         Assert.Null(result);
     }
 
     [Fact]
     public async Task SaveAsync_PersistsNewBoard()
     {
-        // Arrange
         var context = CreateInMemoryContext(nameof(SaveAsync_PersistsNewBoard));
         var repository = CreateRepository(context);
 
         var boardState = BoardState.Create(_fixture.Create<CellState[][]>());
         var board = Board.Create(boardState);
 
-        // Act
         await repository.SaveAsync(board);
 
-        // Assert
         var saved = await context.Boards.FindAsync(board.Id);
         Assert.NotNull(saved);
         Assert.Equal(board.Id, saved?.Id);
@@ -83,7 +74,6 @@ public class BoardRepositoryIntegrationTests
     [Fact]
     public async Task UpdateAsync_UpdatesExistingBoard()
     {
-        // Arrange
         var context = CreateInMemoryContext(nameof(UpdateAsync_UpdatesExistingBoard));
         var repository = CreateRepository(context);
 
@@ -96,10 +86,8 @@ public class BoardRepositoryIntegrationTests
         var newState = BoardState.Create(_fixture.Create<CellState[][]>());
         board.AddState(newState);
 
-        // Act
         await repository.UpdateAsync(board);
 
-        // Assert
         var updated = await context.Boards.FindAsync(board.Id);
         Assert.NotNull(updated);
         Assert.Equal(board.Id, updated?.Id);
